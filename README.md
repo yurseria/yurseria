@@ -1,6 +1,11 @@
 [![Top Langs](https://github-readme-stats.vercel.app/api/top-langs/?username=yurseria&layout=compact&theme=buefy)](https://github.com/anuraghazra/github-readme-stats)
 
 <!--START_SECTION:waka-->
+
+```text
+Other        42 hrs 5 mins   ████████████████████▒░░░░   81.09 %
+```
+
 <!--END_SECTION:waka-->
 
 [![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=yurseria&count_private=true&show_icons=true&theme=buefy)](https://github.com/anuraghazra/github-readme-stats)
