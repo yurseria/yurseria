@@ -33,21 +33,14 @@ jobs:
           plugin_languages_analysis_timeout: 15
           plugin_languages_categories: markup, programming
           plugin_languages_colors: github
+          plugin_languages_indepth: yes
+          plugin_languages_details: lines, bytes-size
           plugin_languages_limit: 8
           plugin_languages_recent_categories: markup, programming
           plugin_languages_recent_days: 14
           plugin_languages_recent_load: 300
           plugin_languages_sections: most-used
           plugin_languages_threshold: 0%
-          plugin_starlists: yes
-          plugin_starlists_languages: yes
-          plugin_starlists_limit: 2
-          plugin_starlists_limit_languages: 8
-          plugin_starlists_limit_repositories: 2
-          plugin_topics: yes
-          plugin_topics_limit: 15
-          plugin_topics_mode: icons
-          plugin_topics_sort: stars
           plugin_achievements: yes
           plugin_achievements_display: compact
           plugin_achievements_secrets: yes
