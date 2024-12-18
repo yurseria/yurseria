@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="480" height="929" class="">
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="949" class="">
     <defs>
         <style/>
     </defs>
@@ -316,15 +316,17 @@
             </section>
             <section class="column">
                 <h3 class="field">Most used languages</h3>
-                <small>estimation from 258kb of code in 181 edited files across 69 commits</small>
+                <small>estimation from 440kb of code in 212 edited files across 71 commits</small>
                 <svg class="bar" xmlns="http://www.w3.org/2000/svg" width="460" height="8">
                     <mask id="languages-bar">
                         <rect x="0" y="0" width="460" height="8" fill="white" rx="5"/>
                     </mask>
                     <rect mask="url(#languages-bar)" x="0" y="0" width="0" height="8" fill="#d1d5da"/>
-                    <rect mask="url(#languages-bar)" x="0" y="0" width="242.48992877630604" height="8" fill="#3178c6"/>
-                    <rect mask="url(#languages-bar)" x="242.48992877630604" y="0" width="208.68187824293403" height="8" fill="#f1e05a"/>
-                    <rect mask="url(#languages-bar)" x="451.1718070192401" y="0" width="8.828192980759935" height="8" fill="#ededed"/>
+                    <rect mask="url(#languages-bar)" x="0" y="0" width="240.77504" height="8" fill="#3178c6"/>
+                    <rect mask="url(#languages-bar)" x="240.77504" y="0" width="207.20608000000001" height="8" fill="#f1e05a"/>
+                    <rect mask="url(#languages-bar)" x="447.98112000000003" y="0" width="8.76576" height="8" fill="#ededed"/>
+                    <rect mask="url(#languages-bar)" x="456.74688000000003" y="0" width="1.94304" height="8" fill="#178600"/>
+                    <rect mask="url(#languages-bar)" x="458.68992000000003" y="0" width="1.31008" height="8" fill="#ededed"/>
                 </svg>
                 <div class="row fill-width">
                     <section>
@@ -352,6 +354,18 @@
                                 <div>1.19 kB</div>
                             </small>
                         </div>
+                        <div class="field language details">
+                            <div class="field">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                                    <path fill="#ededed" fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z"/>
+                                </svg>
+                                Hack
+                            </div>
+                            <small>
+                                <div>7 lines</div>
+                                <div>178 bytes</div>
+                            </small>
+                        </div>
                     </section>
                     <section>
                         <div class="field language details">
@@ -364,6 +378,18 @@
                             <small>
                                 <div>1.29k lines</div>
                                 <div>28.1 kB</div>
+                            </small>
+                        </div>
+                        <div class="field language details">
+                            <div class="field">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+                                    <path fill="#178600" fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8z"/>
+                                </svg>
+                                C#
+                            </div>
+                            <small>
+                                <div>12 lines</div>
+                                <div>264 bytes</div>
                             </small>
                         </div>
                     </section>
@@ -913,7 +939,7 @@
             </section>
             <footer>
                 <span>These metrics include private contributions</span>
-                <span>Last updated 18 Dec 2024, 10:44:08 (timezone Asia/Seoul) with lowlighter/metrics@3.34.0</span>
+                <span>Last updated 18 Dec 2024, 11:58:34 (timezone Asia/Seoul) with lowlighter/metrics@3.34.0</span>
             </footer>
         </div>
         <div xmlns="http://www.w3.org/1999/xhtml" id="metrics-end"></div>
