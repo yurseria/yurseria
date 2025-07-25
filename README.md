@@ -27,4 +27,4 @@ You can click the Preview link to take a look at your changes.
 ![](https://github-readme-streak-stats.herokuapp.com/?user=yurseria&theme=react&hide_border=false)
 
 ## 🏆GitHub Trophies
-![](https://github-profile-trophy.vercel.app/?username=yurseria&theme=radical&no-frame=false&no-bg=false&margin-w=4)
+![](https://github-profile-trophy.vercel.app/?username=yurseria&theme=nord&no-frame=true&no-bg=false&margin-w=4)
