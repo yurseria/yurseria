@@ -41,6 +41,7 @@ You can click the Preview link to take a look at your changes.
 ![Argo](https://img.shields.io/badge/argo-EF7B4D.svg?style=for-the-badge&logo=argo&logoColor=white)
 ![Github Actions](https://img.shields.io/badge/github%20actions-2088FF.svg?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Gitlab](https://img.shields.io/badge/gitlab-FC6D26.svg?style=for-the-badge&logo=gitlab&logoColor=white)<br/>
+![Backstage](https://img.shields.io/badge/backstage-9BF0E1.svg?style=for-the-badge&logo=backstage&logoColor=black)
 ![OpenSearch](https://img.shields.io/badge/opensearch-005EB8.svg?style=for-the-badge&logo=opensearch&logoColor=white)
 ![Grafana](https://img.shields.io/badge/grafana-F46800.svg?style=for-the-badge&logo=grafana&logoColor=white)
 ![Datadog](https://img.shields.io/badge/datadog-632CA6.svg?style=for-the-badge&logo=datadog&logoColor=white)<br/>
