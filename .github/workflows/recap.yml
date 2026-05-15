@@ -1,0 +1,59 @@
+name: Recap
+
+on:
+  schedule:
+    # 03:00 UTC daily (12:00 KST)
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - pipeline/**
+      - .github/workflows/recap.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: recap
+  cancel-in-progress: false
+
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install pipeline deps
+        working-directory: pipeline
+        run: npm install --no-audit --no-fund
+
+      - name: Fetch GitHub stats
+        working-directory: pipeline
+        env:
+          # Use METRIC_TOKEN (PAT with repo + read:org) so that private PR /
+          # review / issue counts are included. Falls back to the workflow's
+          # default GITHUB_TOKEN if the secret is not configured (public-only).
+          GITHUB_TOKEN: ${{ secrets.METRIC_TOKEN || secrets.GITHUB_TOKEN }}
+          RECAP_USER: ${{ github.repository_owner }}
+        run: node fetch-data.mjs
+
+      - name: Render recap SVGs
+        working-directory: pipeline
+        run: node render.mjs
+
+      - name: Commit refreshed recap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add recap/
+          if git diff --staged --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "chore(recap): refresh stats $(date -u +%Y-%m-%d)"
+          git push

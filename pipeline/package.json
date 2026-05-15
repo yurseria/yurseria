@@ -1,0 +1,16 @@
+{
+  "name": "yurseria-recap-pipeline",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "fetch": "node fetch-data.mjs",
+    "render": "node render.mjs",
+    "all": "npm run fetch && npm run render"
+  },
+  "dependencies": {
+    "@octokit/graphql": "^7.1.0",
+    "@octokit/rest": "^20.1.1",
+    "satori": "^0.10.13"
+  }
+}
