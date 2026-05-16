@@ -27,19 +27,26 @@ const fonts = [
 const themes = {
   dark: {
     bg: '#0a0e1a', surface: '#0f1525', headerBg: '#0f1525', border: '#1e293b',
-    text: '#e2e8f0', muted: '#64748b', dim: '#334155',
+    text: '#e2e8f0', label: '#94a3b8', muted: '#64748b', dim: '#334155',
     mint: '#22d3a8', pink: '#f472b6', yellow: '#fbbf24', blue: '#60a5fa', red: '#ef4444',
     chipBg: '#1e293b',
     heatBg: '#161b22', heat: ['#161b22', '#0e4429', '#006d32', '#26a641', '#39d353'],
   },
   light: {
     bg: '#ffffff', surface: '#ffffff', headerBg: '#f1f5f9', border: '#e2e8f0',
-    text: '#0f172a', muted: '#64748b', dim: '#cbd5e1',
+    text: '#0f172a', label: '#475569', muted: '#64748b', dim: '#cbd5e1',
     mint: '#0d9488', pink: '#db2777', yellow: '#d97706', blue: '#2563eb', red: '#dc2626',
     chipBg: '#f1f5f9',
     heatBg: '#ebedf0', heat: ['#ebedf0', '#9be9a8', '#40c463', '#30a14e', '#216e39'],
   },
 };
+
+// ── update date shown in every terminal header (data refresh timestamp) ──
+const UPDATED_DATE = (() => {
+  const d = new Date(DATA.generatedAt);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+})();
 
 // ── load skill-icons as base64 data URIs ──────────────────────────────
 const iconDataUri = (filename) => {
@@ -95,8 +102,11 @@ const TerminalFrame = (theme, title, page, body) =>
         h('div', { style: { width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#f0bd2e' } }),
         h('div', { style: { width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#1ec45c' } }),
       ),
-      h('div', { style: { flex: 1, display: 'flex', justifyContent: 'center', fontSize: '13px', color: theme.muted, letterSpacing: '0.1em' } }, title),
-      h('div', { style: { fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono' } }, page),
+      h('div', { style: { flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'baseline', gap: '8px', fontSize: '13px', color: theme.label, letterSpacing: '0.1em' } },
+        h('span', { style: { fontWeight: 700 } }, title),
+        h('span', { style: { color: theme.muted, fontWeight: 400 } }, `(${UPDATED_DATE})`),
+      ),
+      h('div', { style: { fontSize: '12px', color: theme.label, fontFamily: 'JetBrains Mono' } }, page),
     ),
     h('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', padding: '24px 32px' } }, body),
   );
@@ -122,7 +132,7 @@ const HeroCard = (theme) =>
     ),
 
     h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, justifyContent: 'center' } },
-      h('div', { style: { fontSize: '14px', color: theme.muted, fontFamily: 'JetBrains Mono', letterSpacing: '0.2em' } }, '$ NAME'),
+      h('div', { style: { fontSize: '16px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, '$ NAME'),
       h('div', { style: { fontSize: '170px', lineHeight: 0.95, color: theme.text, fontFamily: 'Inter', fontWeight: 900, letterSpacing: '-0.03em' } }, 'yurseria'),
       h('div', { style: { display: 'flex', alignItems: 'center', gap: '14px', marginTop: '18px' } },
         h('div', { style: { width: '6px', height: '34px', backgroundColor: theme.mint } }),
@@ -143,7 +153,7 @@ const HeroCard = (theme) =>
         { k: 'LANGUAGES',    v: fmtInt(DATA.lifetime.multiLang) },
       ].map(s =>
         h('div', { style: { flex: 1, display: 'flex', flexDirection: 'column', padding: '12px 16px', backgroundColor: theme.chipBg, borderRadius: '8px', border: `1px solid ${theme.border}` } },
-          h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.18em' } }, s.k),
+          h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, s.k),
           h('div', { style: { fontSize: '34px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, marginTop: '2px' } }, s.v),
         ),
       ),
@@ -200,7 +210,7 @@ const StackCard = (theme) =>
         h('div', { style: { display: 'flex', alignItems: 'center', gap: '20px', flex: 1 } },
           h('div', { style: { width: '110px', display: 'flex', flexDirection: 'column' } },
             ...row.label.split('\n').map(l =>
-              h('div', { style: { fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.2em', lineHeight: 1.3 } }, l),
+              h('div', { style: { fontSize: '14px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em', lineHeight: 1.3 } }, l),
             ),
           ),
           h('div', { style: { display: 'flex', flex: 1, gap: '14px' } },
@@ -218,13 +228,14 @@ const StackCard = (theme) =>
     ),
   ]);
 
-// ── Card 03: TOP 5 LANGUAGES ──────────────────────────────────────────
+// ── Card 03: TOP 10 LANGUAGES ─────────────────────────────────────────
 const fmtBytes = (n) => {
   if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(1)} MB`;
   if (n >= 1024) return `${(n / 1024).toFixed(1)} kB`;
   return `${n} B`;
 };
-const langs = DATA.languages.slice(0, 5).map((l) => ({
+const LANG_LIMIT = 10;
+const langs = DATA.languages.slice(0, LANG_LIMIT).map((l) => ({
   name: l.name,
   pct: l.pct,
   color: l.color || '#888888',
@@ -235,31 +246,31 @@ const langFileCount = DATA.languages.length; // distinct language count
 const langSamplingLine = `> sampling ${fmtBytes(langTotalBytes)} across ${fmtInt(DATA.lifetime.repos)} repositories / ${langFileCount} languages...`;
 const LangCard = (theme) =>
   TerminalFrame(theme, 'languages.tsv', '03/05', [
-    Prompt(theme, 'linguist --top 5 --by size'),
-    h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '20px' } },
+    Prompt(theme, `linguist --top ${langs.length} --by size`),
+    h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '14px' } },
       StdoutLine(theme, langSamplingLine, theme.muted),
       StdoutLine(theme, `> #1 winner: ${langs[0].name} (${langs[0].pct}%)`, theme.mint),
     ),
 
-    h('div', { style: { display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '14px' } },
-      h('div', { style: { fontSize: '14px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.2em' } }, 'TOP LANGUAGE'),
-      h('div', { style: { width: '20px', height: '20px', borderRadius: '50%', backgroundColor: langs[0].color } }),
-      h('div', { style: { fontSize: '80px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1 } }, langs[0].name),
-      h('div', { style: { fontSize: '44px', color: theme.yellow, fontFamily: 'Inter', fontWeight: 900, marginLeft: 'auto' } }, `${langs[0].pct}%`),
+    h('div', { style: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px' } },
+      h('div', { style: { fontSize: '15px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'TOP LANGUAGE'),
+      h('div', { style: { width: '18px', height: '18px', borderRadius: '50%', backgroundColor: langs[0].color } }),
+      h('div', { style: { fontSize: '56px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1 } }, langs[0].name),
+      h('div', { style: { fontSize: '36px', color: theme.yellow, fontFamily: 'Inter', fontWeight: 900, marginLeft: 'auto' } }, `${langs[0].pct}%`),
     ),
 
     // bars
-    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '10px', marginTop: '12px' } },
+    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '6px', marginTop: '8px' } },
       ...langs.map((l, i) =>
-        h('div', { style: { display: 'flex', alignItems: 'center', gap: '14px' } },
-          h('div', { style: { width: '32px', fontSize: '20px', color: i === 0 ? theme.yellow : theme.muted, fontFamily: 'Inter', fontWeight: 900 } }, String(i + 1)),
-          h('div', { style: { width: '14px', height: '14px', borderRadius: '50%', backgroundColor: l.color } }),
-          h('div', { style: { width: '160px', fontSize: '20px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, l.name),
-          h('div', { style: { width: '110px', fontSize: '14px', color: theme.muted, fontFamily: 'JetBrains Mono' } }, l.size),
-          h('div', { style: { flex: 1, height: '20px', backgroundColor: theme.chipBg, borderRadius: '4px', overflow: 'hidden', display: 'flex' } },
+        h('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
+          h('div', { style: { width: '28px', fontSize: '16px', color: i === 0 ? theme.yellow : theme.muted, fontFamily: 'Inter', fontWeight: 900, display: 'flex', justifyContent: 'flex-end' } }, String(i + 1)),
+          h('div', { style: { width: '12px', height: '12px', borderRadius: '50%', backgroundColor: l.color } }),
+          h('div', { style: { width: '150px', fontSize: '16px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, l.name),
+          h('div', { style: { width: '90px', fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono' } }, l.size),
+          h('div', { style: { flex: 1, height: '14px', backgroundColor: theme.chipBg, borderRadius: '4px', overflow: 'hidden', display: 'flex' } },
             h('div', { style: { width: `${l.pct}%`, height: '100%', backgroundColor: l.color, borderRadius: '4px' } }),
           ),
-          h('div', { style: { width: '80px', fontSize: '20px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700, textAlign: 'right', display: 'flex', justifyContent: 'flex-end' } }, `${l.pct.toFixed(1)}%`),
+          h('div', { style: { width: '72px', fontSize: '16px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700, textAlign: 'right', display: 'flex', justifyContent: 'flex-end' } }, `${l.pct.toFixed(1)}%`),
         ),
       ),
     ),
@@ -281,14 +292,14 @@ const TIERS = {
 };
 const L = DATA.lifetime;
 const trophies = [
-  { cat: 'COMMITS',     rank: rankFor(L.commits,         TIERS.commits),    count: fmtInt(L.commits),               desc: 'Total commits' },
-  { cat: 'PR · OPENED', rank: rankFor(L.prsOpened,       TIERS.prIssue),    count: fmtInt(L.prsOpened),             desc: 'Pull requests authored' },
-  { cat: 'PR · REVIEW', rank: rankFor(L.prsReviewed,     TIERS.prIssue),    count: fmtInt(L.prsReviewed),           desc: 'Reviews left' },
-  { cat: 'EXPERIENCE',  rank: rankFor(L.experienceYears, TIERS.experience), count: `${L.experienceYears} yr`,       desc: 'Active years on GitHub' },
-  { cat: 'REPOS',       rank: rankFor(L.repos,           TIERS.repos),      count: fmtInt(L.repos),                 desc: 'Public repositories' },
-  { cat: 'MULTI-LANG',  rank: rankFor(L.multiLang,       TIERS.multiLang),  count: fmtInt(L.multiLang),             desc: 'Languages shipped' },
-  { cat: 'STARS',       rank: rankFor(L.stars,           TIERS.stars),      count: fmtInt(L.stars),                 desc: 'Stars received' },
-  { cat: 'ISSUES',      rank: rankFor(L.issues,          TIERS.prIssue),    count: fmtInt(L.issues),                desc: 'Issues opened' },
+  { cat: 'COMMITS',     glyph: 'commits',    rank: rankFor(L.commits,         TIERS.commits),    count: fmtInt(L.commits),         desc: 'Total commits' },
+  { cat: 'PR · OPENED', glyph: 'pr',         rank: rankFor(L.prsOpened,       TIERS.prIssue),    count: fmtInt(L.prsOpened),       desc: 'Pull requests authored' },
+  { cat: 'PR · REVIEW', glyph: 'review',     rank: rankFor(L.prsReviewed,     TIERS.prIssue),    count: fmtInt(L.prsReviewed),     desc: 'Reviews left' },
+  { cat: 'EXPERIENCE',  glyph: 'experience', rank: rankFor(L.experienceYears, TIERS.experience), count: `${L.experienceYears} yr`, desc: 'Active years on GitHub' },
+  { cat: 'REPOS',       glyph: 'repos',      rank: rankFor(L.repos,           TIERS.repos),      count: fmtInt(L.repos),           desc: 'Public repositories' },
+  { cat: 'MULTI-LANG',  glyph: 'langs',      rank: rankFor(L.multiLang,       TIERS.multiLang),  count: fmtInt(L.multiLang),       desc: 'Languages shipped' },
+  { cat: 'STARS',       glyph: 'stars',      rank: rankFor(L.stars,           TIERS.stars),      count: fmtInt(L.stars),           desc: 'Stars received' },
+  { cat: 'ISSUES',      glyph: 'issues',     rank: rankFor(L.issues,          TIERS.prIssue),    count: fmtInt(L.issues),          desc: 'Issues opened' },
 ];
 
 const rankColor = (theme, rank) => {
@@ -305,16 +316,70 @@ const rankColor = (theme, rank) => {
   return { bg: theme.dim, fg: theme.muted };
 };
 
+// ── laurel wreath watermark (loaded from laurel-wreath.svg) ────────────
+const LAUREL_PATHS = (() => {
+  const raw = fs.readFileSync(new URL('./laurel-wreath.svg', import.meta.url), 'utf8');
+  // grab each <path .../> element (the source has 2 — left and right halves of the wreath)
+  return raw.match(/<path[\s\S]*?\/>/g) || [];
+})();
+const laurelWreathSvg = (color) => {
+  // re-color the source paths (original fill is #242033) and wrap in a fresh viewBox
+  const colored = LAUREL_PATHS.map(p => p.replace(/#242033/g, color)).join('');
+  const svg = `<svg viewBox="0 0 3009.3333 2658.6667" xmlns="http://www.w3.org/2000/svg">${colored}</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+};
+
+const RANK_HAS_WREATH = new Set(['SSS', 'SS', 'S']);
+// scale watermark font down for longer rank strings so visual size stays similar
+const rankFontSize = (rank) => ({ 1: 110, 2: 88, 3: 70 }[rank.length] || 90);
+
+// ── trophy category pictograms (single-stroke geometric, rank-colored) ─
+const trophyGlyphSvg = (kind, color) => {
+  const s = `stroke="${color}" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" fill="none"`;
+  const paths = {
+    commits:    `<circle cx="12" cy="12" r="3.2" ${s}/><path d="M2 12h6.8M15.2 12H22" ${s}/>`,
+    pr:         `<circle cx="6" cy="5" r="2" ${s}/><circle cx="6" cy="19" r="2" ${s}/><circle cx="18" cy="19" r="2" ${s}/><path d="M6 7v10M6 7c0 6 6 6 12 6v4" ${s}/>`,
+    review:     `<path d="M3 12s3.5-7 9-7 9 7 9 7-3.5 7-9 7-9-7-9-7z" ${s}/><circle cx="12" cy="12" r="2.6" ${s}/>`,
+    experience: `<circle cx="12" cy="12" r="9" ${s}/><path d="M12 7v5l3.5 2" ${s}/>`,
+    repos:      `<path d="M4 7a2 2 0 0 1 2-2h4l2 2h6a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z" ${s}/>`,
+    langs:      `<circle cx="12" cy="12" r="9" ${s}/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" ${s}/>`,
+    stars:      `<path d="M12 3l2.7 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.4l-5.5 2.9 1.1-6.3L3 9.6l6.3-.9z" ${s}/>`,
+    issues:     `<circle cx="12" cy="12" r="9" ${s}/><path d="M12 7.5v5" ${s}/><circle cx="12" cy="16" r="0.5" fill="${color}"/>`,
+  };
+  return `data:image/svg+xml;base64,${Buffer.from(`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${paths[kind]}</svg>`).toString('base64')}`;
+};
+
 const TrophyCard_ = (theme, t) => {
   const c = rankColor(theme, t.rank);
+  const glyph = trophyGlyphSvg(t.glyph, c.bg);
+  const hasWreath = RANK_HAS_WREATH.has(t.rank);
+  const watermarkColor = theme.label;
+  const wreath = hasWreath ? laurelWreathSvg(watermarkColor) : null;
   return h('div', { style: {
     flex: 1, display: 'flex', flexDirection: 'column',
     padding: '14px 16px', backgroundColor: theme.chipBg,
     borderRadius: '10px', border: `1px solid ${theme.border}`,
-    position: 'relative',
+    position: 'relative', overflow: 'hidden',
   } },
+    // watermark layer: laurel wreath (S+) + giant rank letter, faded grey
+    h('div', { style: {
+      position: 'absolute', top: 0, left: 0, right: 0, bottom: 0,
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      opacity: 0.05,
+    } },
+      h('div', { style: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '256px', height: '226px' } },
+        hasWreath ? h('img', { src: wreath, width: 256, height: 226, style: { position: 'absolute', top: 0, left: 0 } }) : null,
+        h('div', { style: {
+          fontSize: `${rankFontSize(t.rank)}px`,
+          fontFamily: 'Inter', fontWeight: 900,
+          color: watermarkColor, letterSpacing: '-0.04em', lineHeight: 1,
+          display: 'flex',
+        } }, t.rank),
+      ),
+    ),
+    // foreground content
     h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-      h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.18em' } }, `[ ${t.cat} ]`),
+      h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, `[ ${t.cat} ]`),
       h('div', { style: {
         padding: '3px 10px', fontSize: '14px',
         backgroundColor: c.bg, color: c.fg,
@@ -324,6 +389,7 @@ const TrophyCard_ = (theme, t) => {
     ),
     h('div', { style: { fontSize: '54px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1.05, marginTop: '8px' } }, t.count),
     h('div', { style: { fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono', marginTop: '6px' } }, t.desc),
+    h('img', { src: glyph, width: 64, height: 64, style: { position: 'absolute', right: '14px', bottom: '12px', opacity: 0.9 } }),
   );
 };
 
@@ -406,6 +472,13 @@ const monthLabelsFromWeeks = (weeks) => {
   return labels;
 };
 
+// last-30-day daily contribution series (chronological order)
+const last30FromWeeks = (weeks) => {
+  const all = [];
+  for (const w of weeks) for (const d of w.contributionDays) all.push(d);
+  return all.slice(-30);
+};
+
 const ContribCard = (theme) => {
   const weeks = DATA.contributionCalendar.weeks;
   const grid = buildCalendarGrid(weeks);
@@ -413,6 +486,11 @@ const ContribCard = (theme) => {
   const stats = computeContribStats(weeks);
   const totalLastYear = fmtInt(DATA.contributionCalendar.totalContributions);
   const avgPerDay = stats.avg.toFixed(1);
+  const last30 = last30FromWeeks(weeks);
+  const last30Max = Math.max(1, ...last30.map(d => d.contributionCount));
+  const last30Total = last30.reduce((s, d) => s + d.contributionCount, 0);
+  const last30Peak = Math.max(0, ...last30.map(d => d.contributionCount));
+  const CHART_H = 56;
   return TerminalFrame(theme, 'contributions.log', '05/05', [
     Prompt(theme, 'git log --since=1.year --pretty=oneline | wc -l'),
     h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '14px' } },
@@ -422,40 +500,69 @@ const ContribCard = (theme) => {
 
     h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '40px', marginBottom: '20px' } },
       h('div', { style: { display: 'flex', flexDirection: 'column' } },
-        h('div', { style: { fontSize: '13px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.2em' } }, 'LAST 12 MONTHS'),
+        h('div', { style: { fontSize: '15px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'LAST 12 MONTHS'),
         h('div', { style: { fontSize: '120px', lineHeight: 0.95, color: theme.yellow, fontFamily: 'Inter', fontWeight: 900 } }, totalLastYear),
       ),
       h('div', { style: { display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '16px' } },
         h('div', { style: { display: 'flex', gap: '24px' } },
           h('div', { style: { display: 'flex', flexDirection: 'column' } },
-            h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.18em' } }, 'CURRENT STREAK'),
+            h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'CURRENT STREAK'),
             h('div', { style: { fontSize: '36px', color: theme.mint, fontFamily: 'Inter', fontWeight: 900 } }, `${stats.current} days`),
           ),
           h('div', { style: { display: 'flex', flexDirection: 'column' } },
-            h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.18em' } }, 'LONGEST STREAK'),
+            h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'LONGEST STREAK'),
             h('div', { style: { fontSize: '36px', color: theme.pink, fontFamily: 'Inter', fontWeight: 900 } }, `${stats.longest} days`),
           ),
           h('div', { style: { display: 'flex', flexDirection: 'column' } },
-            h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.18em' } }, 'AVG / DAY'),
+            h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'AVG / DAY'),
             h('div', { style: { fontSize: '36px', color: theme.blue, fontFamily: 'Inter', fontWeight: 900 } }, avgPerDay),
           ),
         ),
       ),
     ),
 
+    // last-30-day daily bar chart
+    h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '16px' } },
+      h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '6px' } },
+        h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'LAST 30 DAYS · DAILY'),
+        h('div', { style: { display: 'flex', gap: '14px', fontSize: '12px', fontFamily: 'JetBrains Mono', fontWeight: 700, color: theme.label } },
+          h('div', { style: { display: 'flex', gap: '4px' } },
+            h('span', { style: { color: theme.muted } }, 'peak'),
+            h('span', { style: { color: theme.blue } }, String(last30Peak)),
+          ),
+          h('div', { style: { display: 'flex', gap: '4px' } },
+            h('span', { style: { color: theme.muted } }, 'total'),
+            h('span', { style: { color: theme.text } }, fmtInt(last30Total)),
+          ),
+        ),
+      ),
+      h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '4px', height: `${CHART_H}px`, paddingLeft: '28px' } },
+        ...last30.map(d => {
+          const ratio = d.contributionCount / last30Max;
+          const barH = d.contributionCount > 0 ? Math.max(2, Math.round(ratio * CHART_H)) : 2;
+          const bg = d.contributionCount > 0 ? theme.blue : theme.chipBg;
+          return h('div', { style: { flex: 1, height: `${barH}px`, backgroundColor: bg, borderRadius: '2px' } });
+        }),
+      ),
+      h('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '4px', paddingLeft: '28px', fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700 } },
+        h('div', {}, '-29d'),
+        h('div', {}, 'today'),
+      ),
+    ),
+
     // heatmap
     h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px' } },
       // month labels derived from contributionCalendar (label at the first week of each month)
-      h('div', { style: { display: 'flex', height: '14px', marginBottom: '4px', marginLeft: '24px' } },
+      h('div', { style: { display: 'flex', height: '16px', marginBottom: '4px', marginLeft: '28px' } },
         ...monthLabels.map((m) =>
-          h('div', { style: { flex: 1, fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, display: 'flex', justifyContent: 'flex-start' } }, m),
+          h('div', { style: { flex: 1, fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, display: 'flex', justifyContent: 'flex-start' } }, m),
         ),
       ),
       h('div', { style: { display: 'flex', gap: '4px' } },
         // day labels column
-        h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px', width: '20px' } },
+        h('div', { style: { display: 'flex', flexDirection: 'column', gap: '4px', width: '24px' } },
           ...['', 'Mon', '', 'Wed', '', 'Fri', ''].map(d =>
-            h('div', { style: { height: '14px', fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, d),
+            h('div', { style: { height: '14px', fontSize: '12px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, d),
           ),
         ),
         // heatmap cells
@@ -471,9 +578,9 @@ const ContribCard = (theme) => {
       ),
       // legend
       h('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '6px', marginTop: '6px' } },
-        h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, marginRight: '4px' } }, 'less'),
+        h('div', { style: { fontSize: '12px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, marginRight: '4px' } }, 'less'),
         ...theme.heat.map(c => h('div', { style: { width: '12px', height: '12px', borderRadius: '3px', backgroundColor: c } })),
-        h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700, marginLeft: '4px' } }, 'more'),
+        h('div', { style: { fontSize: '12px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, marginLeft: '4px' } }, 'more'),
       ),
     ),
   ]);
