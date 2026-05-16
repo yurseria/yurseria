@@ -252,25 +252,25 @@ const LangCard = (theme) =>
       StdoutLine(theme, `> #1 winner: ${langs[0].name} (${langs[0].pct}%)`, theme.mint),
     ),
 
-    h('div', { style: { display: 'flex', alignItems: 'center', gap: '20px', marginBottom: '10px' } },
-      h('div', { style: { fontSize: '15px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'TOP LANGUAGE'),
-      h('div', { style: { width: '18px', height: '18px', borderRadius: '50%', backgroundColor: langs[0].color } }),
-      h('div', { style: { fontSize: '56px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1 } }, langs[0].name),
-      h('div', { style: { fontSize: '36px', color: theme.yellow, fontFamily: 'Inter', fontWeight: 900, marginLeft: 'auto' } }, `${langs[0].pct}%`),
+    h('div', { style: { display: 'flex', alignItems: 'center', gap: '24px', marginBottom: '14px' } },
+      h('div', { style: { fontSize: '14px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'TOP LANGUAGE'),
+      h('div', { style: { width: '20px', height: '20px', borderRadius: '50%', backgroundColor: langs[0].color } }),
+      h('div', { style: { fontSize: '80px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1 } }, langs[0].name),
+      h('div', { style: { fontSize: '44px', color: theme.yellow, fontFamily: 'Inter', fontWeight: 900, marginLeft: 'auto' } }, `${langs[0].pct}%`),
     ),
 
-    // bars
-    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '6px', marginTop: '8px' } },
+    // ranked bars — each row flex:1 so they fill the remaining card height evenly
+    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '4px', marginTop: '6px' } },
       ...langs.map((l, i) =>
-        h('div', { style: { display: 'flex', alignItems: 'center', gap: '12px' } },
-          h('div', { style: { width: '28px', fontSize: '16px', color: i === 0 ? theme.yellow : theme.muted, fontFamily: 'Inter', fontWeight: 900, display: 'flex', justifyContent: 'flex-end' } }, String(i + 1)),
-          h('div', { style: { width: '12px', height: '12px', borderRadius: '50%', backgroundColor: l.color } }),
-          h('div', { style: { width: '150px', fontSize: '16px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, l.name),
-          h('div', { style: { width: '90px', fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono' } }, l.size),
-          h('div', { style: { flex: 1, height: '14px', backgroundColor: theme.chipBg, borderRadius: '4px', overflow: 'hidden', display: 'flex' } },
+        h('div', { style: { display: 'flex', alignItems: 'center', gap: '14px', flex: 1 } },
+          h('div', { style: { width: '32px', fontSize: '18px', color: i === 0 ? theme.yellow : theme.muted, fontFamily: 'Inter', fontWeight: 900, display: 'flex', justifyContent: 'flex-end' } }, String(i + 1)),
+          h('div', { style: { width: '14px', height: '14px', borderRadius: '50%', backgroundColor: l.color } }),
+          h('div', { style: { width: '160px', fontSize: '18px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700 } }, l.name),
+          h('div', { style: { width: '100px', fontSize: '13px', color: theme.muted, fontFamily: 'JetBrains Mono' } }, l.size),
+          h('div', { style: { flex: 1, height: '16px', backgroundColor: theme.chipBg, borderRadius: '4px', overflow: 'hidden', display: 'flex' } },
             h('div', { style: { width: `${l.pct}%`, height: '100%', backgroundColor: l.color, borderRadius: '4px' } }),
           ),
-          h('div', { style: { width: '72px', fontSize: '16px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700, textAlign: 'right', display: 'flex', justifyContent: 'flex-end' } }, `${l.pct.toFixed(1)}%`),
+          h('div', { style: { width: '80px', fontSize: '18px', color: theme.text, fontFamily: 'JetBrains Mono', fontWeight: 700, textAlign: 'right', display: 'flex', justifyContent: 'flex-end' } }, `${l.pct.toFixed(1)}%`),
         ),
       ),
     ),
@@ -479,6 +479,29 @@ const last30FromWeeks = (weeks) => {
   return all.slice(-30);
 };
 
+// daily series → smooth line chart SVG (polyline + soft area fill + dots)
+const lineChartSvg = (color, values, vMax, w, h) => {
+  const padX = 6, padTop = 6, padBottom = 4;
+  const innerW = w - 2 * padX;
+  const innerH = h - padTop - padBottom;
+  const max = Math.max(1, vMax);
+  const points = values.map((v, i) => {
+    const x = padX + (innerW * i) / Math.max(1, values.length - 1);
+    const y = padTop + innerH - (innerH * v) / max;
+    return { x: +x.toFixed(1), y: +y.toFixed(1) };
+  });
+  const lineD = points.map((p, i) => `${i ? 'L' : 'M'} ${p.x} ${p.y}`).join(' ');
+  const baseline = (padTop + innerH).toFixed(1);
+  const areaD = `${lineD} L ${points[points.length - 1].x} ${baseline} L ${points[0].x} ${baseline} Z`;
+  const dots = points.map((p) => `<circle cx="${p.x}" cy="${p.y}" r="2.5" fill="${color}"/>`).join('');
+  const svg = `<svg viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">` +
+    `<path d="${areaD}" fill="${color}" fill-opacity="0.16"/>` +
+    `<path d="${lineD}" stroke="${color}" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>` +
+    dots +
+    `</svg>`;
+  return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
+};
+
 const ContribCard = (theme) => {
   const weeks = DATA.contributionCalendar.weeks;
   const grid = buildCalendarGrid(weeks);
@@ -487,10 +510,13 @@ const ContribCard = (theme) => {
   const totalLastYear = fmtInt(DATA.contributionCalendar.totalContributions);
   const avgPerDay = stats.avg.toFixed(1);
   const last30 = last30FromWeeks(weeks);
-  const last30Max = Math.max(1, ...last30.map(d => d.contributionCount));
-  const last30Total = last30.reduce((s, d) => s + d.contributionCount, 0);
-  const last30Peak = Math.max(0, ...last30.map(d => d.contributionCount));
-  const CHART_H = 56;
+  const last30Counts = last30.map(d => d.contributionCount);
+  const last30Max = Math.max(1, ...last30Counts);
+  const last30Total = last30Counts.reduce((s, n) => s + n, 0);
+  const last30Peak = Math.max(0, ...last30Counts);
+  const CHART_W = 1108; // card inner width (1136) minus the 28px paddingLeft
+  const CHART_H = 110;
+  const lineChart = lineChartSvg(theme.blue, last30Counts, last30Max, CHART_W, CHART_H);
   return TerminalFrame(theme, 'contributions.log', '05/05', [
     Prompt(theme, 'git log --since=1.year --pretty=oneline | wc -l'),
     h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '14px' } },
@@ -498,7 +524,7 @@ const ContribCard = (theme) => {
       StdoutLine(theme, '> done.', theme.mint),
     ),
 
-    h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '40px', marginBottom: '20px' } },
+    h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '40px', marginBottom: '30px' } },
       h('div', { style: { display: 'flex', flexDirection: 'column' } },
         h('div', { style: { fontSize: '15px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'LAST 12 MONTHS'),
         h('div', { style: { fontSize: '120px', lineHeight: 0.95, color: theme.yellow, fontFamily: 'Inter', fontWeight: 900 } }, totalLastYear),
@@ -521,9 +547,9 @@ const ContribCard = (theme) => {
       ),
     ),
 
-    // last-30-day daily bar chart
-    h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '16px' } },
-      h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '6px' } },
+    // last-30-day daily line chart
+    h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '28px' } },
+      h('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', marginBottom: '8px' } },
         h('div', { style: { fontSize: '13px', color: theme.label, fontFamily: 'JetBrains Mono', fontWeight: 700, letterSpacing: '0.1em' } }, 'LAST 30 DAYS · DAILY'),
         h('div', { style: { display: 'flex', gap: '14px', fontSize: '12px', fontFamily: 'JetBrains Mono', fontWeight: 700, color: theme.label } },
           h('div', { style: { display: 'flex', gap: '4px' } },
@@ -536,13 +562,8 @@ const ContribCard = (theme) => {
           ),
         ),
       ),
-      h('div', { style: { display: 'flex', alignItems: 'flex-end', gap: '4px', height: `${CHART_H}px`, paddingLeft: '28px' } },
-        ...last30.map(d => {
-          const ratio = d.contributionCount / last30Max;
-          const barH = d.contributionCount > 0 ? Math.max(2, Math.round(ratio * CHART_H)) : 2;
-          const bg = d.contributionCount > 0 ? theme.blue : theme.chipBg;
-          return h('div', { style: { flex: 1, height: `${barH}px`, backgroundColor: bg, borderRadius: '2px' } });
-        }),
+      h('div', { style: { display: 'flex', paddingLeft: '28px' } },
+        h('img', { src: lineChart, width: CHART_W, height: CHART_H, style: { display: 'block' } }),
       ),
       h('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: '4px', paddingLeft: '28px', fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', fontWeight: 700 } },
         h('div', {}, '-29d'),
