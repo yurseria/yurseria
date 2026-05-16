@@ -280,27 +280,38 @@ const LangCard = (theme) =>
 // Ranks follow github-profile-trophy thresholds.
 const rankFor = (value, tiers) => {
   for (const [rank, threshold] of tiers) if (value >= threshold) return rank;
-  return 'C';
+  return 'UNKNOWN';
 };
+// Tier thresholds mirror ryo-ma/github-profile-trophy. Each tier list runs
+// SSS → SS → S → AAA → AA → A → B → C; below C → UNKNOWN.
 const TIERS = {
-  commits:    [['SSS', 4000], ['SS', 2000], ['S', 1000], ['AAA', 500], ['AA', 200], ['A', 100], ['B', 50]],
-  prIssue:    [['SSS', 1000], ['SS', 500],  ['S', 200],  ['AAA', 100], ['AA', 50],  ['A', 25],  ['B', 10]],
-  repos:      [['SSS', 100],  ['SS', 50],   ['S', 30],   ['AAA', 15],  ['AA', 10],  ['A', 5],   ['B', 2]],
-  stars:      [['SSS', 2000], ['SS', 1000], ['S', 500],  ['AAA', 200], ['AA', 100], ['A', 50],  ['B', 10]],
-  experience: [['SSS', 15],   ['SS', 10],   ['S', 7],    ['AAA', 5],   ['AA', 4],   ['A', 3],   ['B', 1]],
-  multiLang:  [['SSS', 30],   ['SS', 20],   ['S', 15],   ['AAA', 10],  ['AA', 8],   ['A', 6],   ['B', 4]],
+  stars:        [['SSS', 2000], ['SS', 700],  ['S', 200],  ['AAA', 100], ['AA', 50], ['A', 30], ['B', 10], ['C', 1]],
+  commits:      [['SSS', 4000], ['SS', 2000], ['S', 1000], ['AAA', 500], ['AA', 200],['A', 100],['B', 10], ['C', 1]],
+  followers:    [['SSS', 1000], ['SS', 400],  ['S', 200],  ['AAA', 100], ['AA', 50], ['A', 20], ['B', 10], ['C', 1]],
+  issues:       [['SSS', 1000], ['SS', 500],  ['S', 200],  ['AAA', 100], ['AA', 50], ['A', 20], ['B', 10], ['C', 1]],
+  pullRequests: [['SSS', 1000], ['SS', 500],  ['S', 200],  ['AAA', 100], ['AA', 50], ['A', 20], ['B', 10], ['C', 1]],
+  repositories: [['SSS', 50],   ['SS', 45],   ['S', 40],   ['AAA', 35],  ['AA', 30], ['A', 20], ['B', 10], ['C', 1]],
+  reviews:      [['SSS', 70],   ['SS', 57],   ['S', 45],   ['AAA', 30],  ['AA', 20], ['A', 8],  ['B', 3],  ['C', 1]],
+  experience:   [['SSS', 70],   ['SS', 55],   ['S', 40],   ['AAA', 28],  ['AA', 18], ['A', 11], ['B', 6],  ['C', 2]],
+  // LongTimeUser is a secret single-threshold trophy in ryo-ma; we render it
+  // with a synthetic ladder where S triggers at the 10-year mark (Village Elder).
+  longTime:     [['SSS', 20],   ['SS', 15],   ['S', 10],   ['AAA', 8],   ['AA', 6],  ['A', 4],  ['B', 2],  ['C', 1]],
 };
-const L = DATA.lifetime;
-const trophies = [
-  { cat: 'COMMITS',     glyph: 'commits',    rank: rankFor(L.commits,         TIERS.commits),    count: fmtInt(L.commits),         desc: 'Total commits' },
-  { cat: 'PR · OPENED', glyph: 'pr',         rank: rankFor(L.prsOpened,       TIERS.prIssue),    count: fmtInt(L.prsOpened),       desc: 'Pull requests authored' },
-  { cat: 'PR · REVIEW', glyph: 'review',     rank: rankFor(L.prsReviewed,     TIERS.prIssue),    count: fmtInt(L.prsReviewed),     desc: 'Reviews left' },
-  { cat: 'EXPERIENCE',  glyph: 'experience', rank: rankFor(L.experienceYears, TIERS.experience), count: `${L.experienceYears} yr`, desc: 'Active years on GitHub' },
-  { cat: 'REPOS',       glyph: 'repos',      rank: rankFor(L.repos,           TIERS.repos),      count: fmtInt(L.repos),           desc: 'Public repositories' },
-  { cat: 'MULTI-LANG',  glyph: 'langs',      rank: rankFor(L.multiLang,       TIERS.multiLang),  count: fmtInt(L.multiLang),       desc: 'Languages shipped' },
-  { cat: 'STARS',       glyph: 'stars',      rank: rankFor(L.stars,           TIERS.stars),      count: fmtInt(L.stars),           desc: 'Stars received' },
-  { cat: 'ISSUES',      glyph: 'issues',     rank: rankFor(L.issues,          TIERS.prIssue),    count: fmtInt(L.issues),          desc: 'Issues opened' },
+const T = DATA.trophy || {};
+const trophyDefs = [
+  { cat: 'COMMITS',        glyph: 'commits',    rank: rankFor(T.commits      ?? 0, TIERS.commits),      count: fmtInt(T.commits      ?? 0), desc: 'Commits (1y, incl. private)' },
+  { cat: 'PULL REQUEST',   glyph: 'pr',         rank: rankFor(T.pullRequests ?? 0, TIERS.pullRequests), count: fmtInt(T.pullRequests ?? 0), desc: 'Pull requests authored' },
+  { cat: 'REVIEWS',        glyph: 'review',     rank: rankFor(T.reviews      ?? 0, TIERS.reviews),      count: fmtInt(T.reviews      ?? 0), desc: 'Reviews left (1y)' },
+  { cat: 'ISSUES',         glyph: 'issues',     rank: rankFor(T.issues       ?? 0, TIERS.issues),       count: fmtInt(T.issues       ?? 0), desc: 'Issues opened' },
+  { cat: 'STARS',          glyph: 'stars',      rank: rankFor(T.stars        ?? 0, TIERS.stars),        count: fmtInt(T.stars        ?? 0), desc: 'Stars received' },
+  { cat: 'FOLLOWERS',      glyph: 'followers',  rank: rankFor(T.followers    ?? 0, TIERS.followers),    count: fmtInt(T.followers    ?? 0), desc: 'GitHub followers' },
+  { cat: 'REPOSITORIES',   glyph: 'repos',      rank: rankFor(T.repositories ?? 0, TIERS.repositories), count: fmtInt(T.repositories ?? 0), desc: 'Public repositories' },
+  { cat: 'EXPERIENCE',     glyph: 'experience', rank: rankFor(T.experience   ?? 0, TIERS.experience),   count: `${T.experience ?? 0} pt`,   desc: 'Account longevity score' },
+  { cat: 'LONG-TIME USER', glyph: 'longtime',   rank: rankFor(T.longTimeYears?? 0, TIERS.longTime),     count: `${T.longTimeYears ?? 0} yr`,desc: 'Years since first activity' },
 ];
+// Sort highest rank first so SSS/SS/S land in the top row of the 3×3 grid.
+const RANK_WEIGHTS = { SSS: 8, SS: 7, S: 6, AAA: 5, AA: 4, A: 3, B: 2, C: 1, UNKNOWN: 0 };
+const trophies = [...trophyDefs].sort((a, b) => RANK_WEIGHTS[b.rank] - RANK_WEIGHTS[a.rank]);
 
 const rankColor = (theme, rank) => {
   // SSS = legendary gold, SS = magenta, S = violet (top tier)
@@ -313,6 +324,7 @@ const rankColor = (theme, rank) => {
   if (rank === 'AA')  return { bg: '#34d399', fg: '#0a0e1a' };
   if (rank === 'A')   return { bg: '#60a5fa', fg: '#0a0e1a' };
   if (rank === 'B')   return { bg: '#94a3b8', fg: theme.bg };
+  if (rank === 'C')   return { bg: theme.dim, fg: theme.muted };
   return { bg: theme.dim, fg: theme.muted };
 };
 
@@ -331,7 +343,7 @@ const laurelWreathSvg = (color) => {
 
 const RANK_HAS_WREATH = new Set(['SSS', 'SS', 'S']);
 // scale watermark font down for longer rank strings so visual size stays similar
-const rankFontSize = (rank) => ({ 1: 110, 2: 88, 3: 70 }[rank.length] || 90);
+const rankFontSize = (rank) => ({ 1: 88, 2: 70, 3: 56 }[rank.length] || 72);
 
 // ── trophy category pictograms (single-stroke geometric, rank-colored) ─
 const trophyGlyphSvg = (kind, color) => {
@@ -345,6 +357,8 @@ const trophyGlyphSvg = (kind, color) => {
     langs:      `<circle cx="12" cy="12" r="9" ${s}/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" ${s}/>`,
     stars:      `<path d="M12 3l2.7 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.4l-5.5 2.9 1.1-6.3L3 9.6l6.3-.9z" ${s}/>`,
     issues:     `<circle cx="12" cy="12" r="9" ${s}/><path d="M12 7.5v5" ${s}/><circle cx="12" cy="16" r="0.5" fill="${color}"/>`,
+    followers:  `<circle cx="9" cy="9" r="3.2" ${s}/><circle cx="16.5" cy="9.5" r="2.4" ${s}/><path d="M3 19c0-3.4 3-5.4 6-5.4s6 2 6 5.4" ${s}/><path d="M14.5 16.2c2.8-.3 5.5 1 6.5 3.3" ${s}/>`,
+    longtime:   `<path d="M7 3h10v4l-4.5 5L17 17v4H7v-4l4.5-5L7 7z" ${s}/><path d="M9 4.5h6M9 19.5h6" ${s}/>`,
   };
   return `data:image/svg+xml;base64,${Buffer.from(`<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">${paths[kind]}</svg>`).toString('base64')}`;
 };
@@ -367,8 +381,8 @@ const TrophyCard_ = (theme, t) => {
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       opacity: 0.05,
     } },
-      h('div', { style: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '256px', height: '226px' } },
-        hasWreath ? h('img', { src: wreath, width: 256, height: 226, style: { position: 'absolute', top: 0, left: 0 } }) : null,
+      h('div', { style: { position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: '180px', height: '160px' } },
+        hasWreath ? h('img', { src: wreath, width: 180, height: 160, style: { position: 'absolute', top: 0, left: 0 } }) : null,
         h('div', { style: {
           fontSize: `${rankFontSize(t.rank)}px`,
           fontFamily: 'Inter', fontWeight: 900,
@@ -387,9 +401,9 @@ const TrophyCard_ = (theme, t) => {
         borderRadius: '6px',
       } }, t.rank),
     ),
-    h('div', { style: { fontSize: '54px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1.05, marginTop: '8px' } }, t.count),
-    h('div', { style: { fontSize: '12px', color: theme.muted, fontFamily: 'JetBrains Mono', marginTop: '6px' } }, t.desc),
-    h('img', { src: glyph, width: 64, height: 64, style: { position: 'absolute', right: '14px', bottom: '12px', opacity: 0.9 } }),
+    h('div', { style: { fontSize: '44px', color: theme.text, fontFamily: 'Inter', fontWeight: 900, lineHeight: 1.05, marginTop: '6px' } }, t.count),
+    h('div', { style: { fontSize: '11px', color: theme.muted, fontFamily: 'JetBrains Mono', marginTop: '4px' } }, t.desc),
+    h('img', { src: glyph, width: 52, height: 52, style: { position: 'absolute', right: '12px', bottom: '10px', opacity: 0.9 } }),
   );
 };
 
@@ -397,11 +411,12 @@ const TrophiesCard = (theme) =>
   TerminalFrame(theme, 'trophies.tsv', '04/05', [
     Prompt(theme, 'gh-trophy --user yurseria --rank-all'),
     h('div', { style: { display: 'flex', flexDirection: 'column', marginBottom: '18px' } },
-      StdoutLine(theme, '> 8 categories · ranks computed from totals', theme.mint),
+      StdoutLine(theme, `> ${trophies.length} categories · sorted by rank · github-profile-trophy parity`, theme.mint),
     ),
-    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '14px' } },
-      h('div', { style: { display: 'flex', gap: '14px', flex: 1 } }, ...trophies.slice(0, 4).map(t => TrophyCard_(theme, t))),
-      h('div', { style: { display: 'flex', gap: '14px', flex: 1 } }, ...trophies.slice(4, 8).map(t => TrophyCard_(theme, t))),
+    h('div', { style: { display: 'flex', flexDirection: 'column', flex: 1, gap: '12px' } },
+      h('div', { style: { display: 'flex', gap: '12px', flex: 1 } }, ...trophies.slice(0, 3).map(t => TrophyCard_(theme, t))),
+      h('div', { style: { display: 'flex', gap: '12px', flex: 1 } }, ...trophies.slice(3, 6).map(t => TrophyCard_(theme, t))),
+      h('div', { style: { display: 'flex', gap: '12px', flex: 1 } }, ...trophies.slice(6, 9).map(t => TrophyCard_(theme, t))),
     ),
   ]);
 
