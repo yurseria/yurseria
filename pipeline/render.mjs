@@ -1,5 +1,6 @@
 import satori from 'satori';
 import fs from 'node:fs';
+import path from 'node:path';
 
 // ── load data fetched by fetch-data.mjs ───────────────────────────────
 const DATA = JSON.parse(fs.readFileSync(new URL('./data.json', import.meta.url), 'utf8'));
@@ -331,13 +332,14 @@ const rankColor = (theme, rank) => {
 // ── laurel wreath watermark (loaded from laurel-wreath.svg) ────────────
 const LAUREL_PATHS = (() => {
   const raw = fs.readFileSync(new URL('./laurel-wreath.svg', import.meta.url), 'utf8');
-  // grab each <path .../> element (the source has 2 — left and right halves of the wreath)
-  return raw.match(/<path[\s\S]*?\/>/g) || [];
+  const paths = raw.match(/<path[\s\S]*?\/>/g) || [];
+  // drop the background rectangle (very high brightness fills like #FDFDFD)
+  return paths.filter(p => !/fill="#[EeFf][0-9A-Fa-f][EeFf][0-9A-Fa-f][EeFf][0-9A-Fa-f]"/i.test(p));
 })();
 const laurelWreathSvg = (color) => {
-  // re-color the source paths (original fill is #242033) and wrap in a fresh viewBox
-  const colored = LAUREL_PATHS.map(p => p.replace(/#242033/g, color)).join('');
-  const svg = `<svg viewBox="0 0 3009.3333 2658.6667" xmlns="http://www.w3.org/2000/svg">${colored}</svg>`;
+  // replace every fill regardless of the original color value
+  const colored = LAUREL_PATHS.map(p => p.replace(/fill="#[0-9A-Fa-f]{6}"/g, `fill="${color}"`)).join('');
+  const svg = `<svg viewBox="0 0 1254 1254" xmlns="http://www.w3.org/2000/svg">${colored}</svg>`;
   return `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`;
 };
 
@@ -631,7 +633,10 @@ const renderers = {
   '05-contrib': ContribCard,
 };
 
-const outDir = new URL('../recap/', import.meta.url);
+const oIdx = process.argv.indexOf('-o');
+const outDir = oIdx !== -1
+  ? new URL(`file://${path.resolve(process.argv[oIdx + 1])}/`)
+  : new URL('../recap/', import.meta.url);
 fs.mkdirSync(outDir, { recursive: true });
 
 let failures = 0;
@@ -640,8 +645,9 @@ for (const [key, Render] of Object.entries(renderers)) {
     try {
       const tree = Render(themes[themeName]);
       const svg = await satori(tree, { width: 1200, height: 675, fonts });
-      fs.writeFileSync(new URL(`./${key}-${themeName}.svg`, outDir), svg);
-      console.log(`wrote recap/${key}-${themeName}.svg`);
+      const svgUrl = new URL(`./${key}-${themeName}.svg`, outDir);
+      fs.writeFileSync(svgUrl, svg);
+      console.log(`wrote ${svgUrl.pathname}`);
     } catch (e) {
       failures++;
       console.error(`FAIL ${key} (${themeName}): ${e.message}`);

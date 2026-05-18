@@ -6,11 +6,16 @@
   "scripts": {
     "fetch": "node fetch-data.mjs",
     "render": "node render.mjs",
-    "all": "npm run fetch && npm run render"
+    "all": "npm run fetch && npm run render",
+    "fetch:dev": "node -r dotenv/config fetch-data.mjs",
+    "dev": "npm run fetch:dev && npm run render -- -o ./out"
   },
   "dependencies": {
     "@octokit/graphql": "^7.1.0",
     "@octokit/rest": "^20.1.1",
     "satori": "^0.10.13"
+  },
+  "devDependencies": {
+    "dotenv": "^17.4.2"
   }
 }
